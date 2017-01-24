@@ -1,18 +1,19 @@
+#$ for globals
 
+#$infile, $outfile, $ch, $sym, $id, $num, $linlen, $kk, $line, $errorFlag, $linelen
 
 class COMPLIER
 	def Initialize
-		@TRUE = 1
-		@FALSE = 0
-		@NORW = 11
-		@TXMAX = 100
-		@NMAX = 14
-		@AL = 20
-		@AMAX = 2047
+		private @TRUE = 1
+		private @FALSE = 0
+		private @NORW = 11
+		private @TXMAX = 100
+		private @NMAX = 14
+		private @AL = 20
+		private @AMAX = 2047
 	end
 
-public OBJECTS
-		
+		public OBJECTS
 			@Constant
 			@Variable
 			@Procedure
@@ -20,7 +21,6 @@ public OBJECTS
 		end
 
 		public SYMBOL
-		
 			@BEGINSYM
 			@CALLSYM
 			@CONSTSYM
@@ -54,7 +54,7 @@ public OBJECTS
 			@BECOMES
 		$end
 
-		public SYMBOL[]=
+		public SYMBOL[] =
 		
 			@SYMBOL.BEGINSYM
 			@SYMBOL.CALLSYM
@@ -75,8 +75,7 @@ public OBJECTS
 			public OBJECTS = kind
 		$end
 
-		public String Word[]
-		
+		public String Word[] =
 			"BEGIN"
 			"CALL"
 			"CONST"
@@ -90,7 +89,7 @@ public OBJECTS
 			"WHILE"
 		$end
 
-		public Char_Word[][]
+		public Char_Word[][] =
 			'B' 'E' 'G' 'I' 'N'
 			'C' 'A' 'L' 'L'
 			'C' 'O' 'N' 'S' 'T'
@@ -149,9 +148,9 @@ public OBJECTS
 
 		public GetChar()
 		
-		if (CC == LL)
+		if CC == LL
 		
-			if (input.hasNext())
+			if input.hasNext()
 			
 				LL = 0
 				CC = 0
@@ -170,239 +169,216 @@ public OBJECTS
 				end
 				else
 					Ch = ' '
+				end
 			end
 		end
 		else
 			Ch = Line[CC.next]
-		while (Ch == '\t')
+		end
+		while Ch == '\t'
 			Ch = Line[CC.next]
 		end
 public GetSym()
-		
 			#@I, @J, @K
-
-			while (Ch == ' ' || Ch == '\r' || Ch == '\n')
+			while Ch == ' ' || Ch == '\r' || Ch == '\n'
 				GetChar()
-
-			if (Ch >= 'A' && Ch <= 'Z')
-			
+			if Ch >= 'A' && Ch <= 'Z'
 				K = 0
 				X = 0
-
-				for ( X < AL )
+				if X < AL then
 					X.next
 					A[X]  = '\0'
 					Id[X] = '\0'
 				end
+				if K < AL
+					A[K.next] = Ch
+				end
+				if CC == LL	
+					GetChar()
+				end
 			end
-				do
-				
-					if (K < AL)
-						A[K.next] = Ch
-					if (CC == LL)
-					
-						GetChar()
-						break
-					end
-					else
-						GetChar()
-				end 
-				while ((Ch >= 'A' && Ch <= 'Z') || (Ch >= '0' && Ch <= '9'))
-
+			elsif
+				GetChar()
+			end 
+			while Ch >= 'A' && Ch <= 'Z' || Ch >= '0' && Ch <= '9'
 				Id = A
-
 				I = 0
 				J = NORW - 1;
-
-				if (K == 1)
+				if K == 1
 					Id_length = 1
+				end
 				else
 					Id_length = K--
-
-				do
-				
+				end
+				elsif
 					K = I + J
 					K = K / 2
-					
 					Temp_id = String.copyValueOf(Id, 0, Id_length)
-
-					if (Id[0] <= Char_Word[K][0])
+				end
+					if Id[0] <= Char_Word[K][0]
 					
-						if (Temp_id.compareTo(Word[K]) <= 0)
+						if Temp_id.compareTo(Word[K]) <= 0
 							J = K - 1
+						end
 					end
-					if (Id[0] >= Char_Word[K][0])
+					if Id[0] >= Char_Word[K][0])
 					
-						if (Temp_id.compareTo(Word[K]) >= 0)
+						if Temp_id.compareTo(Word[K]) >= 0
 							I = K + 1
+						end
 					end
-				end 
-				while (I <= J)
-
-				if (I - 1 > J)
+				while I <= J and if I - 1 > J
 					Sym = Wsym[K]
+				end
 				else
 					Sym = SYMBOL.IDENT
+				end
 			end
-			else if (Ch >= '0' && Ch <= '9')
-			
+			else if Ch >= '0' && Ch <= '9'
 				K = 0;
 				Num = 0;
-				Sym = SYMBOL.NUMBER;
-
-				do
-				
-					if (K >= NMAX)
-						Error(23);
-
+				Sym = SYMBOL.NUMBER
+					if K >= NMAX
+						Error(23)
 					Num = 10 * Num + (Ch - '0')
 					K.next
-
 					GetChar()
-				end 
-			while (Ch >= '0' && Ch <= '9')
+					end
+			end 
+			while Ch >= '0' && Ch <= '9'
 			end
-			else if (Ch == ':')
-			
+			else if Ch == ':'
 				GetChar()
-
-				if (Ch == '=')
-				
+				if Ch == '='
 					Sym = SYMBOL.BECOMES
 					GetChar()
 				end
 				else
 					Sym = SYMBOL.COLON
+				end
 			end
-			else if (Ch == '>')
+			else if Ch == '>'
 				GetChar()
-
-				if (Ch == '=')
+				if Ch == '='
 					Sym = SYMBOL.GEQ
 					GetChar()
 				end
 				else
-					sym = SYMBOL.GTR
+					Sym = SYMBOL.GTR
+				end
 			end
-			else if (Ch == '<')
+			else if Ch == '<'
 				GetChar()
-
-				if (Ch == '=')
+				if Ch == '='
 					Sym = SYMBOL.LEQ
 					GetChar()
 				end
-				else if (Ch == '>')
+				else if Ch == '>'
 					Sym = SYMBOL.NEQ
 					GetChar()
 				end
 				else
 					Sym = SYMBOL.LSS
+				end
 			end
 			else
-				if (Ch == '+')
+				if Ch == '+'
 					Sym = SYMBOL.PLUS
-				else if (Ch == '-')
+				else if Ch == '-'
 					Sym = SYMBOL.MINUS
-				else if (Ch == '*')
+				else if Ch == '*'
 					Sym = SYMBOL.TIMES
-				else if (Ch == '/')
+				else if Ch == '/'
 					Sym = SYMBOL.SLASH
-				else if (Ch == '(')
+				else if Ch == '('
 					Sym = SYMBOL.LPAREN
-				else if (Ch == ')')
+				else if Ch == ')'
 					Sym = SYMBOL.RPAREN
-				else if (Ch == '=')
+				else if Ch == '='
 					Sym = SYMBOL.EQL
-				else if (Ch == '.')
+				else if Ch == '.'
 					Sym = SYMBOL.PERIOD
-				else if (Ch == ',')
+				else if Ch == ','
 					Sym = SYMBOL.COMMA
-				else if (Ch == ';')
+				else if Ch == ';'
 					Sym = SYMBOL.SEMICOLON
-
 				GetChar()
 			end
 		end
-
 		public Enter(OBJECTS K, Tx)
-		
 			Tx.next
 			Table[Tx].Name = String.ValueOf(Id)
 			Table[Tx].Kind = K
-
 			return Tx
 		end
-
 		public Position(Id[], Tx)
 			I = Tx
-
 			Table[0].Name = String.ValueOf(Id)
-
-			while (!Table[I].Name.Equals(String.ValueOf(Id)))
+			while !Table[I].Name.Equals(String.ValueOf(Id))
 				I--
-
 			return I
 		end
-
 		public Block(Tx)
-			if (Sym == SYMBOL.CONSTSYM)
+			if Sym == SYMBOL.CONSTSYM
 				GetSym()
 				Tx = ConstDeclaration(Tx)
-				while (Sym == SYMBOL.COMMA)
+				while Sym == SYMBOL.COMMA
 					GetSym()
 					Tx = ConstDeclaration(Tx)
 				end
-				if (Sym == SYMBOL.SEMICOLON)
+				if Sym == SYMBOL.SEMICOLON
 					GetSym()
+				end
 				else
 					Error(5)
+				end
 			end # End if (CONSTSYM)
 
-			if (Sym == SYMBOL.VARSYM)
+			if Sym == SYMBOL.VARSYM
 				GetSym()
 				Tx = VarDeclaration(Tx)
-				while (Sym == SYMBOL.COMMA)
+				while Sym == SYMBOL.COMMA
 					GetSym()
 					Tx = VarDeclaration(Tx)
 				end
 
-				if (Sym == SYMBOL.SEMICOLON)
+				if Sym == SYMBOL.SEMICOLON
 					GetSym()
+				end
 				else
 					Error(5)
+				end
 			end #END if (VARSYM)
 
-			while (Sym == SYMBOL.PROCSYM)
+			while Sym == SYMBOL.PROCSYM
 				GetSym()
-
-				if (Sym == SYMBOL.IDENT)
+				if Sym == SYMBOL.IDENT
 					Tx = Enter(OBJECTS.Procedure, Tx)
 					GetSym()
 				end
 				else
 					Error(6)
-
-				if (Sym == SYMBOL.SEMICOLON)
+				end
+				if Sym == SYMBOL.SEMICOLON
 					GetSym()
+				end
 				else
 					Error(5)
-
+				end
 				Block(Tx)
-
-				if (Sym == SYMBOL.SEMICOLON)
+				if Sym == SYMBOL.SEMICOLON
 					GetSym()
+				end
 				else
 					Error(5)
+				end
 			end
-
 			Statement(Tx)
 		end
-
 		public Factor(Tx)
 			I
-
-			if (Sym == SYMBOL.IDENT)
-				if ((I = Position(Id, Tx)) == FALSE)
+			if Sym == SYMBOL.IDENT
+				if (I = Position(Id, Tx)) == FALSE then
 					Error(11)
 				GetSym()
 			end
