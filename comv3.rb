@@ -24,6 +24,7 @@ class TableValue
         $name = name
         $kind = kind
     end
+end
 public def _error(num)
     $errorFlag = errorFlag
     errorFlag = num
@@ -348,7 +349,7 @@ public def _statement(tx)
         end
     end
     end
-end
+
 #--------------EXPRESSION--------------------------------------
 public def _expression(tx)
     $sym = sym
