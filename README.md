@@ -1,2 +1,2 @@
 # RubyPascalcompiler
-A Pascal compiler written in the Ruby language
+A Pascal interpreter written in the Ruby language version 2.4
