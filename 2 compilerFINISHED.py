@@ -1,7 +1,7 @@
 #! C:\Program Files\Python26\pythonw
 import sys, string
 
-norw = 23      #number of reserved words Added 1 for FUNCTION
+norw = 25      #number of reserved words Added some for edits.
 txmax = 100   #length of identifier table
 nmax = 14      #max number of digits in number
 al = 10          #length of identifiers
@@ -521,20 +521,21 @@ def expression(tx, level):
     else:
         term(tx, level)
     
-    while sym == "plus" or sym == "minus":
+    while sym == "plus" or sym == "minus" or sym == "or":
         addop = sym
         getsym()
         term(tx, level)
         
         if(addop == "plus"):
             gen("OPR", 0, 2)       #add operation
-        else:
-            gen("OPR", 0, 3)       #subtract operation  
+        else:     
+            gen("OPR", 0, 3)       #subtract operation
+        #figure out OR stuff
 #-------------TERM----------------------------------------------------
 def term(tx, level):
     global sym;
     factor(tx, level)
-    while sym=="times" or sym=="slash":
+    while sym=="times" or sym=="slash" or sym == "and":
         mulop = sym
         getsym()
         factor(tx, level)
@@ -542,6 +543,7 @@ def term(tx, level):
             gen("OPR", 0, 4)         #multiply operation
         else:
             gen("OPR", 0, 5)         #divide operation
+        #figure out AND stuff
 #-------------FACTOR--------------------------------------------------
 def factor(tx, level):
     global sym, num, id;
@@ -576,6 +578,11 @@ def factor(tx, level):
         if sym != "rparen":
             error(22)
         getsym()
+    #elif sym == "not":             IN THEORY THIS IS NOT
+        #getsym()
+        #factor(tx,level)
+        #gen("LIT",0,0)
+        #gen("OPR", 0, =)
     else:
         error(24)
 #-----------CONDITION-------------------------------------------------
@@ -628,7 +635,10 @@ rword.append('OF')
 rword.append('CEND')
 rword.append('WRITE')
 rword.append('WRITELN')
-rword.append('FUNCTION')
+rword.append('FUNCTION') #Added
+rword.append('OR') #Added
+rword.append('NOT') #Added
+rword.append('AND') #Added
 
 ssym = {'+' : "plus",
              '-' : "minus",
