@@ -3,8 +3,8 @@
 # PL/0 Compiler+Interpreter
 # v1.0 Beta
 # 2009-04-07 (last mod: 2009-04-09)
-# TODO: AND/NOT/OR, First Follow
-# Done: Function
+# TODO: First Follow
+# Done: Function, AND/NOT/OR, 
 # String processing in Bash is...SLOOOOOOOOOOOOOOOOOOOOOOW!
 
 ch=
@@ -206,6 +206,11 @@ block() {
 							error 11
 						fi
 						getsym
+					elif [ "${st_kind[$i]}" == NOT]; then #Added NOT modifiction
+						getsym
+						factor $tx
+						gen("LIT", 0 , 0)
+						gen("OPR", 0, "=")	#End NOT modification
 					else
 						error 12
 					fi
@@ -217,7 +222,7 @@ block() {
 					savesym=$sym
 					getsym
 					factor $tx
-					if [ "$savesym" == TIMES ]; then
+					if [ "$savesym" == TIMES ] || [ "$sym" == AND ]; then	#Added AND
 						gen OPR 0 4
 					else
 						gen OPR 0 5
@@ -234,7 +239,7 @@ block() {
 			if [ "$savesym" == MINUS ]; then
 				gen OPR 0 1
 			fi
-			while [ "$sym" == PLUS ] || [ "$sym" == MINUS ]; do
+			while [ "$sym" == PLUS ] || [ "$sym" == MINUS ] || [ "$sym" == OR ]; do #added OR
 				savesym=$sym
 				getsym
 				term $tx
@@ -488,7 +493,7 @@ error() {
 		;;
         23) echo Must be inside Function body   #Added function error
         ;;
-		99)	echo Unknown error				#Added first error
+		99)	echo Skipping because not in first set	#Added first error
 		;;
 		*) echo Unknown error!
 		;;

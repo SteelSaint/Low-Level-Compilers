@@ -7,8 +7,8 @@ v1.0 Beta
 */
 
 // symbol table record structure
-// TODO: AND/OR/NOT, First/Follow
-// DONE: Function
+// TODO: First/Follow
+// DONE: Function, AND/OR/NOT,  
 class tablerec
 {
 		public $name;
@@ -228,13 +228,32 @@ function statement($tx, $lev)
 	{
 		/***** ADD CODE FOR REPEAT-UNTIL HERE *****/
 	}
-	else if ($sym == "WRITE")
+	else if ($sym == "WRITE")	#Added Write
 	{
-		/***** ADD CODE FOR WRITE HERE *****/
+		getsym();
+		if sym != "LPAREN"
+			error();
+		getsym();
+		expression($tx,$lev)
+		if sym != "RPAREN"
+			error();
+		getsym();	#End write modifications
 	}
 	else if ($sym == "WRITELN")
 	{
-		/***** ADD CODE FOR WRITELN HERE *****/
+		getsym();		#Begin writeln modification
+		if sym != "LPAREN"
+			error();
+		getsym();
+		expression($tx, $lev);
+		while TRUE
+			if sym != "COMMA"
+				break;
+			getsym();
+			expression($tx, $lev);
+		if sym != "RPAREN"
+			error();
+		getsym(); #End writeln modification
 	}
 	else if ($sym == "FOR")
 	{
@@ -309,7 +328,7 @@ function expression($tx, $lev)
 		$savesym = $sym;
 		getsym();
 		term($tx, $lev);
-		if ($savesym == "PLUS")
+		if ($savesym == "PLUS") || ($savesym == "OR")	#Added OR
 			gen("OPR", 0, 2);
 		else
 			gen("OPR", 0, 3);
@@ -328,7 +347,7 @@ function term($tx, $lev)
 		$savesym = $sym;
 		getsym();
 		factor($tx, $lev);
-		if ($savesym == "TIMES")
+		if ($savesym == "TIMES") || ($savesym == "AND") #added AND
 			gen("OPR", 0, 4);
 		else ($savesym == "SLASH")
 			gen("OPR", 0, 5);
@@ -398,6 +417,13 @@ function factor($tx, $lev)
 			error(11);
 		getsym();
 	}
+	else if ($sym == "NOT")	#Added NOT modification
+	{
+		getsym();
+		factor($tx, $lev);
+		gen("LIT", 0, 0);
+		gen("OPR", 0, =);
+	}						#End NOT modification
 	else
 		error(12);
 }

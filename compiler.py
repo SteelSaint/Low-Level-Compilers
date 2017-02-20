@@ -171,7 +171,7 @@ def Interpret():
     print "End PL/0"
 #--------------Error Messages----------------------------------------------------------
 def error(num):     #Error(num, set follow) Make the errors go to a list that prints out AFTER it tries to finish
-    global errorFlag;
+    global errorFlag
     errorFlag = 1
     print
     if num == 1: 
@@ -230,11 +230,11 @@ def error(num):     #Error(num, set follow) Make the errors go to a list that pr
         print >>outfile, "Must be inside function body." #Added error for FUNCTION
     elif num == 99:                                     #Added error for the First sets
         print >>outfile, "Skipping because not in First set."   #Message of First set error
-    exit(0)     #while sym not in follow(sym), 
-                    #getsym() //Get rid of exit/stop/boot
+    while sym != follow(sym): 
+        getsym() #Got rid of exit(0)
 #---------GET CHARACTER FUNCTION-------------------------------------------------------------------
 def getch():
-    global  whichChar, ch, linelen, line;
+    global  whichChar, ch, linelen, line
     if whichChar == linelen:         #if at end of line
         whichChar = 0
         line = infile.readline()     #get next line
@@ -308,7 +308,7 @@ def getsym():
         getch()
 #--------------POSITION FUNCTION----------------------------
 def position(tx, id):
-    global  table;
+    global  table
     table[0] = tableValue(id, "TEST", "TEST", "TEST", "TEST")
     i = tx
     while table[i].name != id:
@@ -316,7 +316,7 @@ def position(tx, id):
     return i
 #---------------ENTER PROCEDURE-------------------------------
 def enter(tx, k, level, dx):
-    global id, num, codeIndx;
+    global id, num, codeIndx
     tx[0] += 1
     while (len(table) > tx[0]):
       table.pop()
@@ -333,7 +333,7 @@ def enter(tx, k, level, dx):
     return dx
 #--------------CONST DECLARATION---------------------------
 def constdeclaration(tx, level):
-    global sym, id, num;
+    global sym, id, num
     if sym=="ident":
         getsym()
         if sym == "eql":
@@ -349,7 +349,7 @@ def constdeclaration(tx, level):
         error(4)
 #-------------VARIABLE DECLARATION--------------------------------------
 def vardeclaration(tx, level, dx):
-    global sym;
+    global sym
     if sym=="ident":
         dx = enter(tx, "variable", level, dx)
         getsym()
@@ -358,9 +358,9 @@ def vardeclaration(tx, level, dx):
     return dx
 #-------------BLOCK-------------------------------------------------------------
 def block(tableIndex, level):
-    global sym, id, codeIndx, codeIndx0;
-    #if not (sym in ["VAR", "CONST", "PROCEDURE", "FUNCTION"]): #First of statement still needed
-        #error(99)
+    global sym, id, codeIndx, codeIndx0
+    if not (sym in ["VAR", "CONST", "PROCEDURE", "FUNCTION"]): #First of statement still needed
+        error(99)                                               #First Error added
     tx = [1]
     tx[0] = tableIndex
     tx0 = tableIndex
@@ -376,7 +376,7 @@ def block(tableIndex, level):
                 if sym != "comma":
                     break
             if sym != "semicolon":
-                error(10);
+                error(10)
             getsym()
         if sym == "VAR":
             while True:
@@ -417,9 +417,9 @@ def block(tableIndex, level):
     printCode()
 #--------------STATEMENT----------------------------------------
 def statement(tx, level):       
-    global sym, id, num;
-    #if not (sym in [""]):       #Need to find the first stuff. No idea how the hell to do it.
-        #error(99)
+    global sym, id, num
+    if not (sym in ["ident", "call", "begin", "if", "while", ""]):       #Need to find the first stuff
+        error(99)               #Added First error code
     if sym == "ident" or sym == "function":             #Added function sym
         saveKind = position(tx, id)
         if saveKind==0:
@@ -463,7 +463,6 @@ def statement(tx, level):
             getsym()
             statement(tx, level)   #End IF-THEN-ELSE modification    
 #    elif sym == "REPEAT":
-    	# place your code for REPEAT here
 #    elif sym == "FOR":
     	# place your code for FOR here
 #    elif sym == "CASE":   Check your notes Holec
@@ -540,9 +539,9 @@ def statement(tx, level):
         fixJmp(cx2, codeIndx)
 #--------------EXPRESSION--------------------------------------
 def expression(tx, level):
-    global sym;
-    #if not (sym in ["+","-"]): #first of term needs to be added
-        #error(99)
+    global sym
+    if not (sym in ["+","-"]): #first of term needs to be added
+        error(99)              #First error added
     if sym == "plus" or sym == "minus": 
         addop = sym
         getsym()
@@ -561,15 +560,15 @@ def expression(tx, level):
         else:
             gen("OPR", 0, "+")
         
-        if (addop == "plus"):
+        if (addop == "plus" or "or"):   #Added OR
             gen("OPR", 0, 2)       #add operation
         else:   
             gen("OPR", 0, 3)       #subtract operation
 #-------------TERM----------------------------------------------------
 def term(tx, level):
-    global sym;
-    #if not (sym in []):
-        #error(99) #Check the error code
+    global sym
+    if not (sym in ["*","/"]):     #first of term    
+        error(99)           #Check the error code
     factor(tx, level)
     while sym=="times" or sym=="slash" or sym == "and": #Added AND to while loop
         mulop = sym
@@ -580,15 +579,15 @@ def term(tx, level):
         else:
             gen("OPR", 0, "*")
 
-        if mulop == "times":
+        if (mulop == "times" or "and"):
             gen("OPR", 0, 4)         #multiply operation
         else:
             gen("OPR", 0, 5)         #divide operation
 #-------------FACTOR--------------------------------------------------
 def factor(tx, level):
-    global sym, num, id;
-    #if not (sym in ["ident","lparen", "CALL", "NOT", num]):
-        #error(99) #need to double check the error code
+    global sym, num, id
+    if not (sym in ["ident","lparen", "CALL", "NOT", "num"]): #first of factor
+        error(99)               #need to double check the error code
     if sym == "ident":
         i = position(tx, id)
         if i==0:
@@ -613,6 +612,7 @@ def factor(tx, level):
         if table[i].kind != "function":
             error(15)
         gen("INT", 0, 1)
+        gen("CAL", level-table[i].level, table[i].adr)
         getsym()                  #END FUNCTION modification
     elif sym == "lparen":
         getsym()
@@ -620,18 +620,18 @@ def factor(tx, level):
         if sym != "rparen":
             error(22)
         getsym()
-    elif sym == "NOT":             #IN THEORY THIS IS NOT
+    elif sym == "NOT":             #Begin NOT modification
         getsym()
         factor(tx,level)
         gen("LIT",0,0)
-        gen("OPR", 0, "=")
+        gen("OPR", 0, "=")  #End NOT modification
     else:
         error(24)
 #-----------GeneralExpression-------------------------------------------------
 def generalexpression(tx, level):
-    global sym;
-    #if not (sym in ["ADD", "+", "-", "CALL", "NOT", "ident", "lparen"]):    #added first statements for "condition"
-        #error(99)
+    global sym
+    if not (sym in ["ADD", "+", "-", "CALL", "NOT", "ident", "lparen"]):    #added first statements for "condition"
+        error(99)                   #Added error message
     if sym == "ODD":
         getsym()
         expression(tx, level)
@@ -684,9 +684,9 @@ rword.append('OR') #Added
 rword.append('NOT') #Added
 rword.append('AND') #Added
 
-ssym = {     '+' : "plus",
+ssym = {     '+' : "plus" or "or",
              '-' : "minus",
-             '*' : "times",       
+             '*' : "times" or "and",       
              '/' : "slash",
              '(' : "lparen",
              ')' : "rparen",
@@ -696,8 +696,8 @@ ssym = {     '+' : "plus",
              '#' : "neq",
              '<' : "lss",
              '>' : "gtr",
-             '"' : "leq",
-             '@' : "geq",
+             '<=': "leq",
+             '>=': "geq",
              ';' : "semicolon",
              ':' : "colon",}
 charcnt = 0
