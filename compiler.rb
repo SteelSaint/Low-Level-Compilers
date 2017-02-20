@@ -1,3 +1,9 @@
+# Michael Holec 
+# w933134
+# Done with help from Colton Ladner
+# IDE used was Visual Studio Code with Ruby plug in
+
+
 $TRUE = 1
 $FALSE = 0
 
@@ -27,36 +33,36 @@ $ERROR_NUMBER_IDENT     =    18
 $ERROR_NOPROCEDURE      =    19
 
 module Symb
-    VAR = 0
-    CONST = 1
-    BEGINSYM = 2
-    ENDSYM = 3
-    PERIOD = 4
-    SEMICOLON = 5
-    COLON = 6
-    LPAREN = 7
-    RPAREN = 8
-    GRTHEN = 9
-    LSTHEN = 10
-    GREQL = 11
-    LSEQL = 12
-    EQL = 13
-    ASSIGN = 14
-    IF = 15
-    IDENT = 16
-    NUM = 17
-    PROC = 18
-    NOTEQL = 19
-    MINUS = 20
-    PLUS = 21
-    DIV = 22
-    MULT = 23
-    COMMA = 24
-    ODD = 25
-    CALL = 26
-    THEN = 27
-    WHILE = 28
-    DO = 29
+    VAR         = 0
+    CONST       = 1
+    BEGINSYM    = 2
+    ENDSYM      = 3
+    PERIOD      = 4
+    SEMICOLON   = 5
+    COLON       = 6
+    LPAREN      = 7
+    RPAREN      = 8
+    GRTHEN      = 9
+    LSTHEN      = 10
+    GREQL       = 11
+    LSEQL       = 12
+    EQL         = 13
+    ASSIGN      = 14
+    IF          = 15
+    IDENT       = 16
+    NUM         = 17
+    PROC        = 18
+    NOTEQL      = 19
+    MINUS       = 20
+    PLUS        = 21
+    DIV         = 22
+    MULT        = 23
+    COMMA       = 24
+    ODD         = 25
+    CALL        = 26
+    THEN        = 27
+    WHILE       = 28
+    DO          = 29
 end
 
 module Objtype
@@ -90,11 +96,6 @@ $symstr = [$MAX_SYMBOL]                  #symbols array
 $tableinx = 0                           #table size
 
 def error(num)
-
-	#puts("Entered : error")
-
-    puts("")
-
     case num
         when $ERROR_NOPROCEDURE
             puts( "Procedure not accepted here")
@@ -133,14 +134,11 @@ def error(num)
         when $ERROR_REL
             puts( "Relational operator expected")
     end
-
-    puts("")
     exit 1
 
 end
 
 def enter(kind, name)
-
     $tableinx += 1
     $tablen[$tableinx] = name
     $tablek[$tableinx] = kind
@@ -170,30 +168,19 @@ def enter(kind, name)
 end
 
 def position()
-
-
     i = $tableinx
-
     $tablen[0] = $line
-
     while $tablen[i] != $line do
-        
         i -= 1
-
     end
-
     return i
 end
 
-def block()
-
-
+def block()     #Block
     if $sym == Symb::CONST
-    
-        #// ---- CONSTANT SYM ----
+        #  ---- CONSTANT SYM ----
         getsym()
         enter(Objtype::CONSTANT, $line)
-
         while $sym == Symb::COMMA do
             getsym()
             enter(Objtype::CONSTANT, $line)
@@ -203,15 +190,12 @@ def block()
         end
         getsym()
     end
-    #// ---- VARIABLE SYM ----
+    #  ---- VARIABLE SYM ----
     if $sym == Symb::VAR
-    
         getsym()
-        #puts("Line : " + $line)
         enter(Objtype::VARIABLE, $line)
         while $sym == Symb::COMMA do
             getsym()
-            #puts("Line : " + $line)
             enter(Objtype::VARIABLE, $line)
         end
         if $sym != Symb::SEMICOLON
@@ -219,41 +203,34 @@ def block()
         end
         getsym()
     end
-    #// ---- PROCEDURE SYM ----
+    #  ---- PROCEDURE SYM ----
     while $sym == Symb::PROC do
-    
         while $sym == Symb::PROC do
-        
             getsym()
             if $sym != Symb::IDENT
                 error($ERROR_IDENT)
             end
             enter(Objtype::PROCEDURE, $line)
             getsym()
-
             block()
-
             if $sym != Symb::SEMICOLON
                 error($ERROR_SEMICOLON)
             end
             getsym()
         end
     end
-
     statement()
 end
 
-def statement()
+def statement()     #Statement Block
     i = 0
-
     case $sym
-        #// IDENT
+        # IDENT
         when Symb::IDENT
             i = position()
             if i == 0
                 error($ERROR_UNKNOWN)
             end
-
             case $tablek[i]
                 when Objtype::VARIABLE
                     getsym()
@@ -266,26 +243,22 @@ def statement()
                     error($ERROR_ASSIGN_PROC)
             end
 
-        #// PROCEDURE CALL
+        # PROCEDURE CALL
         when Symb::CALL
             getsym()
-
             if $sym != Symb::IDENT
                 error($ERROR_IDENT)
             end
-
             i = position()
             if i == 0
                 error($ERROR_UNKNOWN)
             end
-
             if $tablek[i] != Objtype::PROCEDURE
                 error($ERROR_PROCEDURE)
             end
-
             getsym()
 
-        #// BEGIN and END block
+        # BEGIN 
         when Symb::BEGINSYM
             getsym()
             statement()
@@ -298,7 +271,7 @@ def statement()
             end
             getsym()
 
-        #// WHILE SYMBOL
+        # WHILE SYMBOL
         when Symb::WHILE
             getsym()
             condition()
@@ -308,7 +281,7 @@ def statement()
             getsym()
             statement()
 
-        #// IF - THEN
+        # IF - THEN
         when Symb::IF
             getsym()
             condition()
@@ -317,12 +290,19 @@ def statement()
             end
             getsym()
             statement()
+            #ELSE - Start ELSE code here
+
+        # REPEAT - Start REPEAT code here
+        # FOR   - Start FOR code here
+        # CASE  - Start CASE code here
+        # WRITE - Start WRITE code here
+        # WRITELN - Start WRITELN code here
+
     end
 end
 
-def condition()
-
-    #// ODD symbol
+def condition()     #Condition 
+    #  ODD symbol
     if $sym == Symb::ODD
         getsym()
         expression()
@@ -337,8 +317,7 @@ def condition()
     end
 end
 
-def expression()
-
+def expression()       #Expression
     if (($sym == Symb::PLUS) || ($sym == Symb::MINUS))
         getsym()
         term()
@@ -352,8 +331,7 @@ def expression()
     end
 end
 
-def term()
-
+def term()      #Term
     factor()
     while (($sym == Symb::MULT) || ($sym == Symb::DIV)) do
         getsym()
@@ -361,12 +339,10 @@ def term()
     end
 end
 
-def factor()
-
+def factor()    #Factor
     i = 0
-
     case $sym
-        #// IDENTIFER
+        #  IDENTIFER
         when Symb::IDENT
             i = position()
             if i == 0
@@ -377,11 +353,11 @@ def factor()
             end
             getsym()
 
-        #// NUMBER
+        #  NUMBER
         when Symb::NUM
             getsym()
 
-        #// LEFT PARENTHESE
+        #  LEFT PARENTHESE
         when Symb::LPAREN
             getsym()
             expression()
@@ -407,21 +383,20 @@ def punct(ch)
 end
 
 def chartype(ch)
-
     if (ch == '\n' || ch == '\r')
-        return Intype::EOL        #// character END-OF-LINE
+        return Intype::EOL        #  character END-OF-LINE
     end
     if ch == ' '
-        return Intype::SPACE      #// character SPACE
+        return Intype::SPACE      #  character SPACE
     end
     if numeric(ch)
-        return Intype::DIGIT      #// character DIGIT
+        return Intype::DIGIT      #  character DIGIT
     end
     if letter(ch)
-        return Intype::ALPHA      #// character ALPHA
+        return Intype::ALPHA      #  character ALPHA
     end
     if punct(ch)
-        return Intype::PUNCT      #// character PUNCTUATION
+        return Intype::PUNCT      #  character PUNCTUATION
     end
     if ch == '=' || ch == '<' || ch == '>' || ch == ')' || ch == '(' || ch == '+' || ch == '-' || ch == '*' || ch == '/'
         return Intype::PUNCT
@@ -433,14 +408,12 @@ end
 
 
 def getchar()
-
     if ( $charcount == $fullline.size)
         $charcount = 0      
         $fullline = gets
         if (($fullline.size == 0) && ($charcount == 0))
             error($ERROR_END_PROG)
         end
-
         $linecount += 1
 
     end
@@ -453,9 +426,7 @@ def getchar()
 end
 
 def getsym()
-
 	$prevsym = $sym
-
     ch = ""
     index = 0
     begin
@@ -463,15 +434,11 @@ def getsym()
     end while (chartype(ch) == Intype::SPACE || chartype(ch) == Intype::EOL || chartype(ch) == Intype::NONE)
 
     if (chartype(ch) == Intype::ALPHA)
-
         $line = ""
-    
         begin
-        
             $line[index] = ch
             index += 1
             ch = getchar()
-        
         end while ((chartype(ch) == Intype::ALPHA || chartype(ch) == Intype::DIGIT || ch  == '_') && (chartype(ch) != Intype::NONE))
         if ch != Intype::NONE
             $charcount -= 1
@@ -512,7 +479,6 @@ def getsym()
         $sym = Symb::NUM
         $number = 0
         begin
-        
             strnum[index] = ch
             index += 1
             $number = 10 * $number + (ch.to_i - 48)
@@ -520,12 +486,10 @@ def getsym()
         end while (chartype(ch) == Intype::DIGIT)
         $charcount -= 1
         $symstr[$sym] = strnum
-
         return
     end
 
     if (chartype(ch) == Intype::PUNCT)
-
         $punc = ""
     
         $punc[index] = ch
@@ -573,20 +537,14 @@ def getsym()
             $sym = Symb::RPAREN
         elsif $punc == ";"
             $sym = Symb::SEMICOLON
-
         end
-
         $symstr[$sym] = $punc
-
         return
     end
 end
 
 #-----------------------------------MAIN
 puts ("Please enter code.")
-
 getsym()
-        
 block()
-
-puts("Successful Compilation! (Nothing Broke!)")
+puts("Successful Compilation!")
